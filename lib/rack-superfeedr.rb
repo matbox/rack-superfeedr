@@ -99,7 +99,7 @@ module Rack
         opts[:userpwd] = "#{@params[:login]}:#{@params[:password]}"
       end
 
-      response = ::Typhoeus::Request.post(endpoint,
+      response = ::Typhoeus::Request.get(endpoint,
                                           opts.merge({
                                                          :params => {
                                                              :'hub.mode' => 'retrieve',

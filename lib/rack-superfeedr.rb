@@ -112,7 +112,7 @@ module Rack
                                                          }
                                                      }))
 
-      body = response.body.read
+      body = response.body
 
       if @params[:format] == "application/json"
         # Let's parse the body as JSON

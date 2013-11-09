@@ -112,8 +112,21 @@ module Rack
                                                          }
                                                      }))
 
-      @error = response.body
-      @params[:async] && response.code == 202 || response.code == 204 # We return true to indicate the status.
+      @response = response.body
+
+      if @params[:format] == "application/json"
+        # Let's parse the body as JSON
+        content = JSON.parse(@response)
+      elsif @params[:format] == "application/atom+xml"
+        # Let's parse the body as ATOM using nokogiri
+        content = Nokogiri.XML(@response)
+      end
+      # Let's now send that data back to the user.
+      info = Hashie::Mash.new(req: req, body: @response)
+      if !@callback.call(content, feed_id, info)
+      end
+
+      response.code == 200 || response.code == 304 # We return true to indicate the status.
     end
 
     ##

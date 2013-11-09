@@ -112,17 +112,17 @@ module Rack
                                                          }
                                                      }))
 
-      @response = response.body
+      body = response.body.read
 
       if @params[:format] == "application/json"
         # Let's parse the body as JSON
-        content = JSON.parse(@response)
+        content = JSON.parse(body)
       elsif @params[:format] == "application/atom+xml"
         # Let's parse the body as ATOM using nokogiri
-        content = Nokogiri.XML(@response)
+        content = Nokogiri.XML(body)
       end
       # Let's now send that data back to the user.
-      info = Hashie::Mash.new(req: response.code, body: @response)
+      info = Hashie::Mash.new(req: response.code, body: body)
       if !@callback.call(content, feed_id, info)
       end
 

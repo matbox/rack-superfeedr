@@ -99,7 +99,7 @@ module Rack
         opts[:userpwd] = "#{@params[:login]}:#{@params[:password]}"
       end
 
-      request = ::Typhoeus::Request.get(endpoint,
+      response = ::Typhoeus::Request.get(endpoint,
                                           opts.merge({
                                                          :params => {
                                                              :'hub.mode' => 'retrieve',
@@ -112,7 +112,6 @@ module Rack
                                                          }
                                                      }))
 
-      response = request.response
       body = response.body
 
       if @params[:format] == "application/json"
@@ -123,9 +122,7 @@ module Rack
         content = Nokogiri.XML(body)
       end
       # Let's now send that data back to the user.
-      info = Hashie::Mash.new(req: response.code, body: body)
-      if !@callback.call(content, feed_id, info)
-      end
+      @callback.call(content, feed_id)
 
       response.code == 200 || response.code == 304 # We return true to indicate the status.
     end

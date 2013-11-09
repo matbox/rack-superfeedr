@@ -99,7 +99,7 @@ module Rack
         opts[:userpwd] = "#{@params[:login]}:#{@params[:password]}"
       end
 
-      response = ::Typhoeus::Request.get(endpoint,
+      request = ::Typhoeus::Request.get(endpoint,
                                           opts.merge({
                                                          :params => {
                                                              :'hub.mode' => 'retrieve',
@@ -112,6 +112,7 @@ module Rack
                                                          }
                                                      }))
 
+      response = request.response
       body = response.body
 
       if @params[:format] == "application/json"

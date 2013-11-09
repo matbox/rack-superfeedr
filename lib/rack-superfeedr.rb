@@ -122,7 +122,7 @@ module Rack
         content = Nokogiri.XML(@response)
       end
       # Let's now send that data back to the user.
-      info = Hashie::Mash.new(req: req, body: @response)
+      info = Hashie::Mash.new(req: response.code, body: @response)
       if !@callback.call(content, feed_id, info)
       end
 

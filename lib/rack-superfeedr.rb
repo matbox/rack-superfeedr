@@ -120,7 +120,7 @@ module Rack
         content = Nokogiri.XML(response.body)
       end
       # Let's now send that data back to the user.
-      @callback.call(response.body, feed_id)
+      @callback.call(content, feed_id)
 
       response.code == 200 || response.code == 304 # We return true to indicate the status.
     end

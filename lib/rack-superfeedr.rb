@@ -59,7 +59,7 @@ module Rack
     end
 
     ##
-    # Unsubscribes a url. If you used an id for the susbcription, you need to use _the same_.
+    # Unsubscribes a url. If you used an id for the subscription, you need to use _the same_.
     # The optional block will be called to let you confirm the subscription (or not). This is not applicable for if you use params[:async] => true
     # It returns true if the unsubscription was successful (or will be confirmed if you used async => true in the options), false otherwise
     # You can also pass an opts third argument that will be merged with the options used in Typhoeus's Request (https://github.com/dbalatero/typhoeus)
@@ -80,6 +80,38 @@ module Rack
         },
         :userpwd => "#{@params[:login]}:#{@params[:password]}"
       }))
+      @error = response.body
+      @params[:async] && response.code == 202 || response.code == 204 # We return true to indicate the status.
+    end
+
+    ##
+    # Retrieving Entries with PubSubHubbub
+    def retrieve(url, id = nil, opts = {}, &block)
+      feed_id = "#{id ? id : Base64.urlsafe_encode64(url)}"
+      if block
+        @verifications[feed_id] ||= {}
+        @verifications[feed_id]['retrieve'] = block
+      end
+      endpoint = opts[:hub] || SUPERFEEDR_ENDPOINT
+      opts.delete(:hub)
+
+      if endpoint == SUPERFEEDR_ENDPOINT
+        opts[:userpwd] = "#{@params[:login]}:#{@params[:password]}"
+      end
+
+      response = ::Typhoeus::Request.post(endpoint,
+                                          opts.merge({
+                                                         :params => {
+                                                             :'hub.mode' => 'retrieve',
+                                                             :'hub.count' => opts[:count] ? opts[:count] : 10,
+                                                             :'hub.topic' => url,
+                                                             :'hub.callback' =>  generate_callback(url, feed_id)
+                                                         },
+                                                         :headers => {
+                                                             :Accept => @params[:format] == "json" ? "application/json" : "application/atom+xml"
+                                                         }
+                                                     }))
+
       @error = response.body
       @params[:async] && response.code == 202 || response.code == 204 # We return true to indicate the status.
     end

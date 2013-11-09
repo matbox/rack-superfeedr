@@ -112,15 +112,8 @@ module Rack
                                                          }
                                                      }))
 
-      if @params[:format] == "application/json"
-        # Let's parse the body as JSON
-        content = JSON.parse(response.body)
-      elsif @params[:format] == "application/atom+xml"
-        # Let's parse the body as ATOM using nokogiri
-        content = Nokogiri.XML(response.body)
-      end
       # Let's now send that data back to the user.
-      @callback.call(eval(response.body), feed_id)
+      @callback.call(response.body, feed_id)
 
       response.code == 200 || response.code == 304 # We return true to indicate the status.
     end

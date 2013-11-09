@@ -112,14 +112,12 @@ module Rack
                                                          }
                                                      }))
 
-      body = response.body
-
       if @params[:format] == "application/json"
         # Let's parse the body as JSON
-        content = JSON.parse(body)
+        content = JSON.parse(response.body)
       elsif @params[:format] == "application/atom+xml"
         # Let's parse the body as ATOM using nokogiri
-        content = Nokogiri.XML(body)
+        content = Nokogiri.XML(response.body)
       end
       # Let's now send that data back to the user.
       @callback.call(response.body, feed_id)
